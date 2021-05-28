@@ -55,7 +55,14 @@ public:
 
     explicit ZigbeeClusterBinaryInput(ZigbeeNetwork *network, ZigbeeNode *node, ZigbeeNodeEndpoint *endpoint, Direction direction, QObject *parent = nullptr);
 
+    bool presentValue() const;
+
+signals:
+    void presentValueChanged(bool presentValue);
+
 private:
+    bool m_presentValue = false;
+
     void setAttribute(const ZigbeeClusterAttribute &attribute) override;
 
 };

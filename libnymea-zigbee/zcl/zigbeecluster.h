@@ -90,12 +90,9 @@ public:
     ZigbeeClusterAttribute attribute(quint16 attributeId);
 
     // ZCL global commands
-    ZigbeeClusterReply *readAttributes(QList<quint16> attributes);
-    ZigbeeClusterReply *writeAttributes(QList<ZigbeeClusterLibrary::WriteAttributeRecord> writeAttributeRecords);
-    ZigbeeClusterReply *configureReporting(QList<ZigbeeClusterLibrary::AttributeReportingConfiguration> reportingConfigurations);
-
-
-
+    ZigbeeClusterReply *readAttributes(QList<quint16> attributes, quint16 manufacturerCode = 0x0000);
+    ZigbeeClusterReply *writeAttributes(QList<ZigbeeClusterLibrary::WriteAttributeRecord> writeAttributeRecords, quint16 manufacturerCode = 0x0000);
+    ZigbeeClusterReply *configureReporting(QList<ZigbeeClusterLibrary::AttributeReportingConfiguration> reportingConfigurations, quint16 manufacturerCode = 0x0000);
 
 protected:
     ZigbeeNetwork *m_network = nullptr;
@@ -112,7 +109,8 @@ protected:
     QHash<quint8, ZigbeeClusterReply *> m_pendingReplies;
 
     // Global commands
-    ZigbeeClusterReply *executeGlobalCommand(quint8 command, const QByteArray &payload = QByteArray());
+    ZigbeeClusterReply *executeGlobalCommand(quint8 command, const QByteArray &payload = QByteArray(), quint16 manufacturerCode = 0x0000);
+    ZigbeeClusterReply *executeManufacturerSpecificGlobalCommand(quint8 command, quint16 manufacturerCode, const QByteArray &payload = QByteArray());
 
     // Cluster specific
     ZigbeeClusterReply *createClusterReply(const ZigbeeNetworkRequest &request, ZigbeeClusterLibrary::Frame frame);

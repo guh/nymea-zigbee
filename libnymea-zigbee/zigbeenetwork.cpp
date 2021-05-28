@@ -53,7 +53,6 @@ ZigbeeNetwork::ZigbeeNetwork(const QUuid &networkUuid, QObject *parent) :
         }
     });
 
-
     m_reachableRefreshTimer = new QTimer(this);
     m_reachableRefreshTimer->setInterval(120000);
     m_reachableRefreshTimer->setSingleShot(false);

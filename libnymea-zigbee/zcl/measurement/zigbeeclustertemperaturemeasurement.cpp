@@ -51,6 +51,11 @@ void ZigbeeClusterTemperatureMeasurement::setAttribute(const ZigbeeClusterAttrib
         bool valueOk = false;
         qint16 value = attribute.dataType().toInt16(&valueOk);
         if (valueOk) {
+            if (value == static_cast<qint16>(0x8000)) {
+                qCDebug(dcZigbeeCluster()) << m_node << m_endpoint << this << "received invalid measurement value. Not updating the attribute.";
+                return;
+            }
+
             m_temperature = value / 100.0;
             qCDebug(dcZigbeeCluster()) << "Temperature changed on" << m_node << m_endpoint << this << m_temperature << "°C";
             emit temperatureChanged(m_temperature);

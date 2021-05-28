@@ -56,6 +56,11 @@ void ZigbeeClusterPressureMeasurement::setAttribute(const ZigbeeClusterAttribute
         bool valueOk = false;
         qint16 value = attribute.dataType().toInt16(&valueOk);
         if (valueOk) {
+            if (value == static_cast<qint16>(0x8000)) {
+                qCDebug(dcZigbeeCluster()) << m_node << m_endpoint << this << "received invalid measurement value. Not updating the attribute.";
+                return;
+            }
+
             m_pressure = value / 10.0;
             qCDebug(dcZigbeeCluster()) << "Pressure changed on" << m_node << m_endpoint << this << m_pressure << "kPa";
             emit pressureChanged(m_pressure);
@@ -64,6 +69,11 @@ void ZigbeeClusterPressureMeasurement::setAttribute(const ZigbeeClusterAttribute
         bool valueOk = false;
         qint16 value = attribute.dataType().toInt16(&valueOk);
         if (valueOk) {
+            if (value == static_cast<qint16>(0x8000)) {
+                qCDebug(dcZigbeeCluster()) << m_node << m_endpoint << this << "received invalid measurement value. Not updating the attribute.";
+                return;
+            }
+
             m_pressureScaled = value / 10.0;
             qCDebug(dcZigbeeCluster()) << "Pressure scaled changed on" << m_node << m_endpoint << this << m_pressureScaled << "Pa";
             emit pressureScaledChanged(m_pressureScaled);

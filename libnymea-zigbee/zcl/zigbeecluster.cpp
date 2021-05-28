@@ -96,7 +96,7 @@ void ZigbeeCluster::setAttribute(const ZigbeeClusterAttribute &attribute)
     updateOrAddAttribute(attribute);
 }
 
-ZigbeeClusterReply *ZigbeeCluster::readAttributes(QList<quint16> attributes)
+ZigbeeClusterReply *ZigbeeCluster::readAttributes(QList<quint16> attributes, quint16 manufacturerCode)
 {
     qCDebug(dcZigbeeCluster()) << "Read attributes from" << m_node << m_endpoint << this << attributes;
 
@@ -108,10 +108,10 @@ ZigbeeClusterReply *ZigbeeCluster::readAttributes(QList<quint16> attributes)
         stream << attribute;
     }
 
-    return executeGlobalCommand(ZigbeeClusterLibrary::CommandReadAttributes, payload);
+    return executeGlobalCommand(ZigbeeClusterLibrary::CommandReadAttributes, payload, manufacturerCode);
 }
 
-ZigbeeClusterReply *ZigbeeCluster::writeAttributes(QList<ZigbeeClusterLibrary::WriteAttributeRecord> writeAttributeRecords)
+ZigbeeClusterReply *ZigbeeCluster::writeAttributes(QList<ZigbeeClusterLibrary::WriteAttributeRecord> writeAttributeRecords, quint16 manufacturerCode)
 {
     qCDebug(dcZigbeeCluster()) << "Write attributes on" << m_node << m_endpoint << this;
     QByteArray payload;
@@ -119,10 +119,10 @@ ZigbeeClusterReply *ZigbeeCluster::writeAttributes(QList<ZigbeeClusterLibrary::W
         payload += ZigbeeClusterLibrary::buildWriteAttributeRecord(writeAttributeRecord);
     }
 
-    return executeGlobalCommand(ZigbeeClusterLibrary::CommandWriteAttributes, payload);
+    return executeGlobalCommand(ZigbeeClusterLibrary::CommandWriteAttributes, payload, manufacturerCode);
 }
 
-ZigbeeClusterReply *ZigbeeCluster::configureReporting(QList<ZigbeeClusterLibrary::AttributeReportingConfiguration> reportingConfigurations)
+ZigbeeClusterReply *ZigbeeCluster::configureReporting(QList<ZigbeeClusterLibrary::AttributeReportingConfiguration> reportingConfigurations, quint16 manufacturerCode)
 {
     qCDebug(dcZigbeeCluster()) << "Configure reporting on" << m_node << m_endpoint << this << reportingConfigurations;
 
@@ -131,11 +131,11 @@ ZigbeeClusterReply *ZigbeeCluster::configureReporting(QList<ZigbeeClusterLibrary
         payload += ZigbeeClusterLibrary::buildAttributeReportingConfiguration(reportingConfiguration);
     }
 
-    return executeGlobalCommand(ZigbeeClusterLibrary::CommandConfigureReporting, payload);
+    return executeGlobalCommand(ZigbeeClusterLibrary::CommandConfigureReporting, payload, manufacturerCode);
 }
 
 
-ZigbeeClusterReply *ZigbeeCluster::executeGlobalCommand(quint8 command, const QByteArray &payload)
+ZigbeeClusterReply *ZigbeeCluster::executeGlobalCommand(quint8 command, const QByteArray &payload, quint16 manufacturerCode)
 {
     // Build the request
     ZigbeeNetworkRequest request = createGeneralRequest();
@@ -145,7 +145,12 @@ ZigbeeClusterReply *ZigbeeCluster::executeGlobalCommand(quint8 command, const QB
     // Note: for basic commands the frame control files has to be zero accoring to spec ZCL 2.4.1.1
     ZigbeeClusterLibrary::FrameControl frameControl;
     frameControl.frameType = ZigbeeClusterLibrary::FrameTypeGlobal;
-    frameControl.manufacturerSpecific = false;
+    if (manufacturerCode != 0) {
+        frameControl.manufacturerSpecific = true;
+    } else {
+        frameControl.manufacturerSpecific = false;
+    }
+
     if (m_direction == Direction::Server) {
         frameControl.direction = ZigbeeClusterLibrary::DirectionClientToServer;
     } else {
@@ -157,6 +162,9 @@ ZigbeeClusterReply *ZigbeeCluster::executeGlobalCommand(quint8 command, const QB
     ZigbeeClusterLibrary::Header header;
     header.frameControl = frameControl;
     header.command = command;
+    if (manufacturerCode != 0) {
+        header.manufacturerCode = manufacturerCode;
+    }
     header.transactionSequenceNumber = m_transactionSequenceNumber++;
 
     // Put them together
@@ -185,7 +193,6 @@ ZigbeeClusterReply *ZigbeeCluster::executeGlobalCommand(quint8 command, const QB
 
     return zclReply;
 }
-
 
 ZigbeeClusterReply *ZigbeeCluster::createClusterReply(const ZigbeeNetworkRequest &request, ZigbeeClusterLibrary::Frame frame)
 {
@@ -394,7 +401,7 @@ void ZigbeeCluster::finishZclReply(ZigbeeClusterReply *zclReply)
     m_pendingReplies.remove(zclReply->transactionSequenceNumber());
     qCDebug(dcZigbeeCluster()) << "ZigbeeClusterReply finished" << zclReply->request() << zclReply->requestFrame() << zclReply->responseFrame();
     // FIXME: Set the status
-    zclReply->finished();
+    emit zclReply->finished();
 }
 
 void ZigbeeCluster::processDataIndication(ZigbeeClusterLibrary::Frame frame)

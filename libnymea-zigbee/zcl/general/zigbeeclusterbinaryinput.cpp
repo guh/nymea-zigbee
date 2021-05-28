@@ -34,8 +34,26 @@ ZigbeeClusterBinaryInput::ZigbeeClusterBinaryInput(ZigbeeNetwork *network, Zigbe
 
 }
 
+bool ZigbeeClusterBinaryInput::presentValue() const
+{
+    return m_presentValue;
+}
+
 void ZigbeeClusterBinaryInput::setAttribute(const ZigbeeClusterAttribute &attribute)
 {
     qCDebug(dcZigbeeCluster()) << "Update attribute" << m_node << m_endpoint << this << static_cast<Attribute>(attribute.id()) << attribute.dataType();
     updateOrAddAttribute(attribute);
+
+    // Parse the information for convenience
+    if (attribute.id() == AttributePresentValue) {
+        bool valueOk = false;
+        bool value = attribute.dataType().toBool(&valueOk);
+        if (valueOk) {
+            m_presentValue = value;
+            qCDebug(dcZigbeeCluster()) << "Binary input state changed on" << m_node << m_endpoint << this << m_presentValue;
+            emit presentValueChanged(m_presentValue);
+        } else {
+            qCWarning(dcZigbeeCluster()) << "Failed to parse attribute data"  << m_node << m_endpoint << this << attribute;
+        }
+    }
 }

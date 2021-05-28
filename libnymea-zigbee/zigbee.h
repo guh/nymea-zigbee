@@ -55,6 +55,7 @@ public:
         ZigbeeProfilePersonalHomeHospitalCare = 0x0108,
         ZigbeeProfileAdvancedMetering = 0x0109,
         ZigbeeProfileLightLink = 0xC05E,
+        ZigbeeProfileDevelco = 0xC0C9,
         ZigbeeProfileGreenPower = 0xA1E0
     };
     Q_ENUM(ZigbeeProfile)
@@ -286,6 +287,7 @@ public:
         Chipcon                 = 0x1001,
         Ember                   = 0x1003,
         Philips                 = 0x100b,
+        Develco                 = 0x1015,
         Ikea                    = 0x117C,
         FeiBit                  = 0x117E
     };

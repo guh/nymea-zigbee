@@ -51,6 +51,11 @@ void ZigbeeClusterIlluminanceMeasurment::setAttribute(const ZigbeeClusterAttribu
         bool valueOk = false;
         quint16 value = attribute.dataType().toUInt16(&valueOk);
         if (valueOk) {
+            if (value == 0xffff) {
+                qCDebug(dcZigbeeCluster()) << m_node << m_endpoint << this << "received invalid measurement value. Not updating the attribute.";
+                return;
+            }
+
             m_illuminance = value;
             qCDebug(dcZigbeeCluster()) << "Illuminance changed on" << m_node << m_endpoint << this << m_illuminance << "lux";
             emit illuminanceChanged(m_illuminance);

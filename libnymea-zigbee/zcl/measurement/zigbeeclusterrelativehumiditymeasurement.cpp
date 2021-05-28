@@ -51,6 +51,11 @@ void ZigbeeClusterRelativeHumidityMeasurement::setAttribute(const ZigbeeClusterA
         bool valueOk = false;
         quint16 value = attribute.dataType().toUInt16(&valueOk);
         if (valueOk) {
+            if (value == 0xffff) {
+                qCDebug(dcZigbeeCluster()) << m_node << m_endpoint << this << "received invalid measurement value. Not updating the attribute.";
+                return;
+            }
+
             m_humidity = value / 100.0;
             qCDebug(dcZigbeeCluster()) << "Humidity changed on" << m_node << m_endpoint << this << m_humidity << "%";
             emit humidityChanged(m_humidity);
