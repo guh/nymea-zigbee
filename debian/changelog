@@ -1,3 +1,12 @@
+nymea-zigbee (0.1.3) xenial; urgency=medium
+
+  [ Simon Stürz ]
+  * Add develco profile and manufacturer and manufacturer specific
+    cluster methods
+  * Improve node removed behavior
+
+ -- Jenkins <jenkins@nymea.io>  Fri, 28 May 2021 15:56:55 +0200
+
 nymea-zigbee (0.1.2) xenial; urgency=medium
 
   [ Michael Zanetti ]
